@@ -4,8 +4,11 @@
 import os
 import numpy as np
 import pandas as pd
-import plotly.plotly as py
-import plotly.graph_objs as go
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+from plotly.graph_objs import Scatter, Figure, Layout
+
+init_notebook_mode(connected=True)
+
 
 # Add Lat and Long into list
 def add_lat_long(nlat, nlong, lat, lng):
@@ -73,6 +76,7 @@ def search_route_for_journey(data_frames, df, files, journey):
     journey_data = df.describe()
 
     correl_val = calculate_correlation(journey_data, data_frames[0].describe())
+    #print (data_frames[0]['Lat'].values)
     found_index = 0
 
     for i in range(1, len(data_frames)):
@@ -80,6 +84,22 @@ def search_route_for_journey(data_frames, df, files, journey):
         if correl_val_tmp > correl_val:
             correl_val = correl_val_tmp
             found_index = i
+
+    trace1 = Scatter(
+        x = df['Lat'].values,
+        y = df['Lng'].values,
+        mode = 'lines',
+        name = 'Journey'
+    )
+    
+    trace2 = Scatter(
+        x = data_frames[found_index]['Lat'].values,
+        y = data_frames[found_index]['Lng'].values,
+        mode = 'markers',
+        name = 'Route'
+    )
+    data = [trace1, trace2]
+    iplot(data, filename='basic-line')
 
     print("========================= Journey: " + journey + " =========================")
     print("Recommendation for Bus Number: " + files[found_index].replace(".xlsx", ""))
